@@ -1,0 +1,128 @@
+<?php
+// get all storepickup location data
+$allStores = $block->getAllStores();
+// Define helper of storebase
+$baseHelper = $this->helper('Excellence\Storebase\Helper\Data');
+// Get the lat long of the selected storepickup
+$paramsLatLong = $baseHelper->getStoreLatLong();
+// Get name of current storepickup location
+$currentStoreName = $baseHelper->getCurrentStoreName();
+// Get Store config is active or not
+$configVal = 'googleMap/setting/active';
+?>
+<?php if(!$baseHelper->getConfig($configVal)):?>
+    <p class="no_stores"><?= __("Sorry, currently there are no store locations."); ?></p>
+<?php else: ?>
+
+    <div class="outer_container">
+        <h1>
+            <?= $currentStoreName; ?>
+            <a href="<?php echo 'https://www.google.com/maps?saddr=My+Location&daddr='.$paramsLatLong["lat"].','.$paramsLatLong["long"]?>" target="_blank" class="get_direction">
+                <strong>
+                    <?=__("[ GET DIRECTIONS ]");?>
+                </strong>
+            </a>
+            <br>
+            <a href="<?php echo 'https://www.google.com/maps?saddr=My+Location&daddr='.$paramsLatLong["lat"].','.$paramsLatLong["long"]?>" target="_blank" class="mobile get_direction">
+                <strong>
+                    <?=__("[ GET DIRECTIONS ]");?>
+                </strong>
+            </a>
+        </h1>
+        <div class="row google_map_container">
+            <div class="google_map">
+                <div id="googleMap" style="width:100%;height:500px;"></div>
+            </div>
+        </div>
+        <div class="row store_details_container">
+            <div class="store_head">
+                <p><?= __('Store List'); ?></p>
+            </div>
+            <div class="store_details">
+                <?php
+                    foreach ($allStores as $data):
+                ?>
+                <div class="each_store">
+                    <h2><strong><?= $data["store_name"]; ?></strong></h2>
+                    <strong><?= __('Address'); ?></strong>
+                    <p><?= $data['street_one'].", "; ?><br />
+                    <?php if($data['street_two']): ?><?= $data['street_two'].",";?><br /><?php endif; ?>
+                    <?= $data["city"]; ?><br />
+                    <?= $data["region_id"]; ?> - <?= $data["zipcode"]; ?><br />
+                    <?= $baseHelper->getCountryname($data["country"]); ?></p>
+                    <strong><?= __('Telephone'); ?></strong>
+                    <p><?= $data["number"]; ?></p>
+                    <strong><?= __('Timings'); ?></strong>
+                    <p><?= $data["time"]; ?></p>
+                    <p>
+                        <a href="<?php echo 'https://www.google.com/maps?saddr=My+Location&daddr='.$data['latitude'].','.$data['longitude']?>" target="_blank" class="get_direction">
+                            <strong>
+                                <?= __("[ GET DIRECTIONS ]"); ?>
+                            </strong>
+                        </a>
+                    </p>
+                </div>
+                <?php
+                    endforeach;
+                ?>
+            </div>
+        </div>
+        <div class="clearer"></div>
+    </div>
+<?php endif;?>
+
+<!-- Google Map JS -->
+<script type="text/javascript">
+require(['jquery'], function($) {
+	$(window).on('load', function (){
+		setMarkers();
+	});
+});
+function initModule() {
+	initMap();
+
+	// Create the autocomplete object, restricting the search to geographical
+    // location types.
+    autocomplete = new google.maps.places.Autocomplete(
+        /** @type {!HTMLInputElement} */(document.getElementById('searchInput')),
+        {types: ['geocode']});
+
+    // When the user selects an address from the dropdown, populate the address
+    // fields in the form.
+    autocomplete.addListener('place_changed', fillInAddress);
+}
+
+function fillInAddress() {
+    // Get the place details from the autocomplete object.
+    var place = autocomplete.getPlace();
+}
+        	
+// Initialise map with a specific lat long if not having any stores
+function initMap() {
+    map = new google.maps.Map(document.getElementById('googleMap'), {
+        zoom: 10,
+        center: { lat: <?= $baseHelper->getDlat();?>, lng: <?= $baseHelper->getDlong();?> }
+    });
+}
+// Get Data from the URL Lat-Long to Map
+window.paramsLatLong = <?php /* @escapeNotVerified */ echo \Zend_Json::encode($paramsLatLong)?>;
+var storeLatLong = window.paramsLatLong;
+// Set Markers
+function setMarkers() {
+    markersArray = [];
+    var bounds = new google.maps.LatLngBounds();
+    var infoWindow = new google.maps.InfoWindow();
+    var lat = paramsLatLong['lat'];
+    var long = paramsLatLong['long'];
+    var base_url = "<?php $this->getUrl(); ?>";
+    var marker = new google.maps.Marker({
+        position: new google.maps.LatLng(lat, long),
+        map: map,
+    });
+    bounds.extend(marker.position);
+    markersArray.push(marker);
+    map.fitBounds(bounds);
+}
+</script>
+<!-- Google Maps API -->
+<script src="https://maps.googleapis.com/maps/api/js?key=<?php echo $baseHelper->getApi(); ?>&libraries=geometry,places&&callback=initModule"></script>
