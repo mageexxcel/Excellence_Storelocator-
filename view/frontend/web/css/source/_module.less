@@ -1,0 +1,129 @@
+/* 	Storelocator Page CSS starts here 	*/
+body.storelocator-index-index,
+body.storelocator-index-store {
+	#maincontent {
+		.column.main {
+			.outer_container {
+				.row.google_map_container {
+				    width: 75%;
+	    			float: right;
+	    			.google_map {
+	    				padding-left: 15px;
+	    			}
+				}
+				.row.store_details_container {
+				    width: 25%;
+				    float: left;
+				    .store_head {
+			    	    background: #000;
+					    color: #fff;
+					    font-weight: bold;
+					    padding: 10px;
+					    margin-bottom: 15px;
+					    p {
+					    	margin: 0;
+					    }
+				    }
+				    .store_details {
+				    	float: left;
+				    	height: 445px;
+					    overflow-y: auto;
+					    list-style: none;
+					    background: #ddd;
+					    padding: 12px;
+					    width: 100%;
+					    box-sizing: border-box;
+					    border: #ddd solid 1px;
+				    	.each_store {
+			    		    background: #e7e7e7;
+							padding: 30px 30px 20px 30px;
+						    font-size: 90%;
+						    text-align: left;
+						    border-bottom: 1px solid #ccc;
+				    		h2 {
+				    			margin-top: 0;
+				    		}
+				    	}
+				    }
+				}
+			}
+			.clearer {
+				clear: both;
+			}
+		}
+	}
+}
+
+/* 		Store Location Page CSS		*/
+
+body.storelocator-index-store {
+	#maincontent {
+		.page-title-wrapper {
+			display: none;
+		}
+		.column.main {
+			.outer_container {
+				h1 {
+					a.get_direction {
+						font-size: 20px;
+					    text-decoration: none;
+					    vertical-align: middle;
+					    &:hover {
+					    	color: #000;
+					    }
+					}
+					a.mobile.get_direction {
+						display: none;
+					}
+				}
+			}
+		}
+	}
+}
+
+
+/* 			Mobile View 		*/
+
+@media (max-width: 767px) {
+	body.storelocator-index-index,
+	body.storelocator-index-store {
+		#maincontent {
+			.column.main {
+				padding: 0;
+				.outer_container {
+					.row.google_map_container {
+					    width: 100%;
+		    			float: none;
+		    			margin-bottom: 15px;
+		    			.google_map {
+		    				padding-left: 0;
+		    			}
+					}
+					.row.store_details_container {
+					    width: 100%;
+					    float: none;
+					}
+				}
+			}
+		}
+	}
+	body.storelocator-index-store {
+		#maincontent {
+			.page-title-wrapper {
+				display: none;
+			}
+			.column.main {
+				.outer_container {
+					h1 {
+						a.get_direction {
+							display: none;
+						}
+						a.mobile.get_direction {
+							display: unset;
+						}
+					}
+				}
+			}
+		}
+	}	
+}

@@ -1,0 +1,128 @@
+<?php
+$allStores = $block->getAllStores();
+$baseHelper = $this->helper('Excellence\Storebase\Helper\Data');
+?>
+
+<div class="outer_container">
+    <?php
+        if(count($allStores) == 0):
+    ?>
+    <p class="no_stores"><?= __("Sorry currently there are no store locations."); ?></p>
+    <?php
+        else:
+    ?>
+    <div class="row google_map_container">
+    	<div class="google_map">
+    		<div id="googleMap" style="width:100%;height:500px;"></div>
+    	</div>
+    </div>
+    <div class="row store_details_container">
+        <div class="store_head">
+            <p><?= __('Store List'); ?></p>
+        </div>
+        <div class="store_details">
+            <?php
+                foreach ($allStores as $data):
+            ?>
+            <div class="each_store">
+                <h2><strong><?= $data["store_name"]; ?></strong></h2>
+                <strong><?= __('Address'); ?></strong>
+                <p><?= $data['street_one'].", "; ?><br />
+                <?php if($data['street_two']): ?><?= $data['street_two'].",";?><br /><?php endif; ?>
+                <?= $data["city"]; ?><br />
+                <?= $data["region_id"]; ?> - <?= $data["zipcode"]; ?><br />
+                <?= $baseHelper->getCountryname($data["country"]); ?></p>
+                <strong><?= __('Telephone'); ?></strong>
+                <p><?= $data["number"]; ?></p>
+                <strong><?= __('Timings'); ?></strong>
+                <p><?= $data["time"]; ?></p>
+                <p>
+                    <a href="<?php echo 'https://www.google.com/maps?saddr=My+Location&daddr='.$data['latitude'].','.$data['longitude']?>" target="_blank" class="get_direction">
+                        <strong>
+                            <?= __("[ GET DIRECTIONS ]"); ?>
+                        </strong>
+                    </a>
+                </p>
+            </div>
+            <?php
+                endforeach;
+            ?>
+        </div>
+    </div>
+    <?php
+        endif;
+    ?>
+    <div class="clearer"></div>
+</div>
+
+<!-- Google Map JS -->
+<script type="text/javascript">
+require(['jquery'], function($) {
+	$(window).on('load', function (){
+		setMarkers();
+	});
+});
+function initModule() {
+	initMap();
+
+	// Create the autocomplete object, restricting the search to geographical
+    // location types.
+    autocomplete = new google.maps.places.Autocomplete(
+        /** @type {!HTMLInputElement} */(document.getElementById('searchInput')),
+        {types: ['geocode']});
+
+    // When the user selects an address from the dropdown, populate the address
+    // fields in the form.
+    autocomplete.addListener('place_changed', fillInAddress);
+}
+
+function fillInAddress() {
+    // Get the place details from the autocomplete object.
+    var place = autocomplete.getPlace();
+}
+        	
+// Initialise map with a specific lat long if not having any stores
+function initMap() {
+    map = new google.maps.Map(document.getElementById('googleMap'), {
+        zoom: 10,
+        center: { lat: <?= $baseHelper->getDlat();?>, lng: <?= $baseHelper->getDlong();?> }
+    });
+}
+// Get Data from the Storelocator block to Map
+window.customerJsonData = <?php /* @escapeNotVerified */ echo \Zend_Json::encode($allStores)?>;
+var storesData = window.customerJsonData;
+// Set Markers
+function setMarkers() {
+    markersArray = [];
+    var image = {
+        size: new google.maps.Size(32, 28),
+        origin: new google.maps.Point(0, 0),
+        anchor: new google.maps.Point(0, 28)
+    };
+    var bounds = new google.maps.LatLngBounds();
+    var infoWindow = new google.maps.InfoWindow();
+    for (var i = 0; i < storesData.length; i++) {
+        var store = storesData[i];
+        var storeCount = i + 1;
+        var lat = store.latitude;
+        var long = store.longitude;
+        var base_url = "<?php $this->getUrl(); ?>";
+        var marker = new google.maps.Marker({
+            position: new google.maps.LatLng(lat, long),
+            map: map,
+            label: {
+                text: String(storeCount),
+                color: "#fff",
+                fontSize: "14px",
+                fontWeight: "bold"
+            },
+            title: store.store_name,
+        });
+        bounds.extend(marker.position);
+        markersArray.push(marker);
+    }
+    map.fitBounds(bounds);
+}
+</script>
+<!-- Google Maps API -->
+<script src="https://maps.googleapis.com/maps/api/js?key=<?php echo $baseHelper->getApi(); ?>&libraries=geometry,places&&callback=initModule"></script>
